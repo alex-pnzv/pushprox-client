@@ -18,8 +18,11 @@ found [here](https://mirror-03.infra.openwrt.org/releases/22.03.6/targets/ath79/
 wget https://mirror-03.infra.openwrt.org/releases/22.03.6/targets/ath79/generic/openwrt-sdk-22.03.6-ath79-generic_gcc-11.2.0_musl.Linux-x86_64.tar.xz 
 ```
 3. Navigate to the package dir and clone this repo.
-4. From SDK root dir execute the following command to build the package.
+4. From SDK root dir execute the following commands to build the package.
 ```commandline
+./scripts/feeds update -a
+./scripts/feeds install -a
+
 make package/pushprox-client/compile
 ```
 5. Copy package to the router and install it.
