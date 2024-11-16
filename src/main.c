@@ -110,9 +110,10 @@ int do_push(const char *proxy_url, const char *scrape_id, char *metrics) {
     return 0;
 }
 
-int do_scrape(char *host, const char *proxy_url, char *scrape_id) {
+int do_scrape(const char *proxy_url, char *scrape_id) {
     CURL *curl;
     CURLcode res;
+    const char *prometheus_exporter_url = "http://127.0.0.1:9100/metrics";
 
     char *response_buffer = allocate_response_buffer();
     if (!response_buffer) {
@@ -128,7 +129,7 @@ int do_scrape(char *host, const char *proxy_url, char *scrape_id) {
         return 1;
     }
 
-    curl_easy_setopt(curl, CURLOPT_URL, host);
+    curl_easy_setopt(curl, CURLOPT_URL, prometheus_exporter_url);
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response_buffer);
     curl_easy_setopt(curl, CURLOPT_TIMEOUT, TIMEOUT);
@@ -151,7 +152,6 @@ int do_scrape(char *host, const char *proxy_url, char *scrape_id) {
 int do_poll(const char *proxy_url, const char *post_data){
     CURL *curl;
     CURLcode res;
-    char exporter_url[100];
     char scrape_id [64];
     char proxy_poll_url[MAX_URL_LENGTH];
     char path[] = "/poll";
@@ -207,8 +207,6 @@ int do_poll(const char *proxy_url, const char *post_data){
     //      Id: 508c3ca5-5ab2-4c81-b5e6-3f926be73f65
     //      X-Prometheus-Scrape-Timeout-Seconds: 10
 
-    sscanf(response_buffer, "GET %99s HTTP/1.1", exporter_url);
-
     char *headers_start = strstr(response_buffer, "\r\n") + 2; // Skip past the request line
     char *line = strtok(headers_start, "\r\n");
     while (line != NULL) {
@@ -222,7 +220,7 @@ int do_poll(const char *proxy_url, const char *post_data){
     }
 
     //printf("Exporter URL: %s, scrape_id: %s\n", exporter_url, scrape_id);
-    do_scrape(exporter_url, proxy_url,scrape_id);
+    do_scrape(proxy_url,scrape_id);
 
     free(response_buffer);
     curl_easy_cleanup(curl);
